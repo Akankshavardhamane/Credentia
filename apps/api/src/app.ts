@@ -1,14 +1,18 @@
 import { generateKeyPairSync } from "node:crypto";
 import { MockBlockchainAdapter } from "@credentia/blockchain";
-import { createStatusList } from "@credentia/credential-core";
 import Fastify from "fastify";
 import { ZodError } from "zod";
+import { CredentialQrService } from "./modules/credentials/qr.js";
+import { CredentialRepository } from "./modules/credentials/repository.js";
+import { credentialRoutes } from "./modules/credentials/routes.js";
+import { CredentialService } from "./modules/credentials/service.js";
 import { InstitutionRepository } from "./modules/institutions/repository.js";
 import { institutionRoutes } from "./modules/institutions/routes.js";
 import { InstitutionService } from "./modules/institutions/service.js";
 import { VerificationRepository } from "./modules/verification/repository.js";
 import { verificationRoutes } from "./modules/verification/routes.js";
 import { VerificationService } from "./modules/verification/service.js";
+import { HttpError } from "./shared/errors.js";
 export function buildApp() {
   const app = Fastify({
     logger: {
@@ -20,6 +24,8 @@ export function buildApp() {
   });
   const institutions = new InstitutionService(new InstitutionRepository());
   const keyPair = generateKeyPairSync("ed25519");
+  const credentials = new CredentialRepository();
+  const verificationMethod = "did:web:demo.university.edu#key-1";
   const chain = new MockBlockchainAdapter([
     {
       did: "did:web:demo.university.edu",
@@ -35,17 +41,31 @@ export function buildApp() {
       return reply
         .code(400)
         .send({ error: "Invalid request", details: error.flatten() });
+    if (error instanceof HttpError)
+      return reply.code(error.statusCode).send({ error: error.message });
     app.log.error(error);
     return reply.code(500).send({ error: "Internal server error" });
   });
   app.get("/health", async () => ({ status: "ok" }));
   institutionRoutes(app, institutions);
+  credentialRoutes(
+    app,
+    new CredentialService(
+      credentials,
+      {
+        privateKey: keyPair.privateKey,
+        verificationMethod,
+      },
+      new CredentialQrService(),
+    ),
+  );
   verificationRoutes(
     app,
     new VerificationService(
       chain,
-      keyPair.publicKey,
-      createStatusList(),
+      (method) =>
+        method === verificationMethod ? keyPair.publicKey : undefined,
+      credentials,
       new VerificationRepository(),
     ),
   );

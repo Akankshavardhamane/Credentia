@@ -1,51 +1,51 @@
-import { generateKeyPairSync } from "node:crypto";
-import {
-  issueCredential,
-  signCredential,
-  supersedeCredential,
-} from "@credentia/credential-core";
-const keys = generateKeyPairSync("ed25519");
-const active = signCredential(
-  issueCredential({
-    id: "urn:uuid:demo-active",
-    issuer: "did:web:demo.university.edu",
-    subject: {
-      id: "student-demo-001",
-      degree: "Bachelor of Computer Science",
-      graduationDate: "2026-05-01",
-    },
-    statusIndex: 0,
-    statusListId: "urn:credentia:status:demo",
-  }),
-  keys.privateKey,
-  "did:web:demo.university.edu#key-2",
+import { buildApp } from "./app.js";
+import { credentialFixtureInputs } from "./modules/credentials/fixtures.js";
+
+const app = buildApp();
+const issue = async (name: keyof typeof credentialFixtureInputs) => {
+  const response = await app.inject({
+    method: "POST",
+    url: "/credentials",
+    payload: credentialFixtureInputs[name],
+  });
+  if (response.statusCode !== 201)
+    throw new Error(`Could not create ${name} fixture: ${response.body}`);
+  return response.json().credential;
+};
+const valid = await issue("valid");
+const revoked = await issue("revoked");
+const suspended = await issue("suspended");
+const expired = await issue("expired");
+const superseded = await issue("superseded");
+const untrustedIssuer = await issue("untrustedIssuer");
+await Promise.all(
+  ["revoked", "suspended", "expired"].map((status) =>
+    app.inject({
+      method: "POST",
+      url: `/credentials/${encodeURIComponent(`urn:credentia:demo:${status}`)}/status`,
+      payload: { status },
+    }),
+  ),
 );
-const revoked = {
-  ...active,
-  id: "urn:uuid:demo-revoked",
-  credentialStatus: { ...active.credentialStatus, statusListIndex: "1" },
-};
-const superseded = supersedeCredential(active, "urn:uuid:demo-replacement");
-const fixture = {
-  institutions: [
-    { did: "did:web:demo.university.edu", accreditation: "approved" },
-    { did: "did:web:unaccredited.example", accreditation: "pending" },
-  ],
-  issuerKeys: [
+const replacement = await app.inject({
+  method: "POST",
+  url: `/credentials/${encodeURIComponent(superseded.id)}/supersede`,
+  payload: { id: "urn:credentia:demo:superseded-v2" },
+});
+console.log(
+  JSON.stringify(
     {
-      verificationMethod: "did:web:demo.university.edu#key-1",
-      status: "retired",
+      valid,
+      tampered: { ...valid, issuer: "did:web:attacker.example" },
+      revoked,
+      suspended,
+      expired,
+      superseded,
+      supersededReplacement: replacement.json().credential,
+      untrustedIssuer,
     },
-    {
-      verificationMethod: "did:web:demo.university.edu#key-2",
-      status: "active",
-    },
-  ],
-  credentials: {
-    active,
-    tampered: { ...active, issuer: "did:web:attacker.example" },
-    revoked,
-    superseded,
-  },
-};
-console.log(JSON.stringify(fixture, null, 2));
+    null,
+    2,
+  ),
+);
+await app.close();
