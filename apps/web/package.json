@@ -9,6 +9,7 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@credentia/domain": "workspace:*",
     "@credentia/ui": "workspace:*",
     "@vitejs/plugin-react": "^4.3.4",
     "vite": "^6.0.3",

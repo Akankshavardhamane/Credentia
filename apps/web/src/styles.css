@@ -9,7 +9,7 @@ body {
   font-family: Manrope, Arial, sans-serif;
 }
 main {
-  max-width: 1000px;
+  max-width: 1080px;
   margin: auto;
   padding: 32px;
 }
@@ -54,14 +54,18 @@ button {
   cursor: pointer;
   border-radius: 8px;
 }
+button:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
 .active {
   background: #e1eee8;
   color: #176b52;
   font-weight: 700;
 }
-section {
-  max-width: 720px;
-  margin-top: 85px;
+.hero {
+  max-width: 880px;
+  margin-top: 75px;
 }
 .eyebrow {
   color: #176b52;
@@ -72,27 +76,161 @@ section {
 h2 {
   font-size: 42px;
   line-height: 1.1;
-  margin: 8px 0 22px;
+  margin: 8px 0 26px;
+  max-width: 680px;
 }
-textarea {
-  display: block;
+h3 {
+  font-size: 30px;
+  margin: 7px 0;
+}
+input {
   width: 100%;
-  height: 180px;
   border: 1px solid #cbd6ce;
-  border-radius: 10px;
-  padding: 14px;
-  font: 13px "DM Mono", monospace;
+  border-radius: 9px;
+  padding: 12px;
+  font: inherit;
   background: white;
+  color: inherit;
+}
+.form-card {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+  background: white;
+  padding: 24px;
+  border: 1px solid #d9ddd5;
+  border-radius: 14px;
+}
+label {
+  font-size: 13px;
+  color: #53645b;
+  font-weight: 700;
+}
+label input {
+  display: block;
+  margin-top: 7px;
+  font-weight: 400;
 }
 .primary {
-  margin-top: 14px;
   background: #176b52;
   color: white;
   font-weight: 700;
+  width: fit-content;
+}
+.form-card .primary {
+  grid-column: span 2;
+  margin-top: 4px;
+}
+.demo {
+  margin-top: 30px;
+  display: flex;
+  gap: 7px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.demo p {
+  width: 100%;
+  margin: 0 0 4px;
+}
+.demo button {
+  background: #e5e9e4;
+  color: #42554a;
+  font-size: 13px;
+}
+.certificate {
+  display: grid;
+  grid-template-columns: 1fr 280px;
+  gap: 28px;
+  padding: 34px;
+  background: white;
+  border: 1px solid #d9ddd5;
+  border-radius: 14px;
+  box-shadow: 0 18px 38px #1a2c2111;
+}
+.degree {
+  font-size: 21px;
+  color: #176b52;
+  font-weight: 700;
+}
+dl {
+  display: grid;
+  grid-template-columns: 150px 1fr;
+  gap: 10px;
+  margin: 26px 0;
+  font-size: 14px;
+}
+dt {
+  color: #66766d;
+}
+dd {
+  margin: 0;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+.mono {
+  font-family: "DM Mono", monospace;
+  font-size: 12px;
+}
+aside {
+  border-left: 1px solid #d9ddd5;
+  padding-left: 25px;
+  display: grid;
+  align-content: start;
+  gap: 13px;
+}
+aside img {
+  width: 200px;
+  border-radius: 8px;
+}
+aside a {
+  color: #176b52;
+  font-family: "DM Mono", monospace;
+  font-size: 11px;
+  overflow-wrap: anywhere;
+}
+small {
+  color: #66766d;
+  line-height: 1.5;
+}
+.verify-bar {
+  display: flex;
+  gap: 10px;
+  max-width: 680px;
+}
+.verify-bar .primary {
+  flex-shrink: 0;
+}
+.result {
+  margin-top: 25px;
+}
+.trust {
+  display: flex;
+  gap: 13px;
+  align-items: center;
+  padding: 17px;
+  border-radius: 10px;
+}
+.trust span {
+  font-size: 28px;
+  font-weight: 800;
+}
+.trust p {
+  margin: 3px 0 0;
+  color: #53645b;
+  font-size: 14px;
+}
+.trust-good {
+  color: #176b52;
+  background: #e5f2eb;
+}
+.trust-bad {
+  color: #a63431;
+  background: #f9e8e6;
 }
 .evidence {
-  margin-top: 34px;
+  margin-top: 15px;
   display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: 10px;
 }
 article {
@@ -107,9 +245,26 @@ article.invalid {
 article p {
   margin: 6px 0 0;
   color: #53645b;
-  font-size: 14px;
+  font-size: 13px;
+  line-height: 1.45;
+}
+.notice {
+  background: #fff4df;
+  color: #744b0b;
+  padding: 12px;
+  border-radius: 8px;
+  margin: 18px 0 0;
+}
+.empty {
+  color: #66766d;
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
 }
 @media (max-width: 650px) {
+  main {
+    padding: 22px;
+  }
   header {
     align-items: flex-start;
     flex-wrap: wrap;
@@ -119,5 +274,24 @@ article p {
   }
   h2 {
     font-size: 34px;
+  }
+  .form-card,
+  .certificate {
+    grid-template-columns: 1fr;
+  }
+  .form-card .primary {
+    grid-column: auto;
+  }
+  aside {
+    border-left: 0;
+    border-top: 1px solid #d9ddd5;
+    padding-left: 0;
+    padding-top: 20px;
+  }
+  .evidence {
+    grid-template-columns: 1fr;
+  }
+  .verify-bar {
+    flex-direction: column;
   }
 }
