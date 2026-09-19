@@ -107,19 +107,24 @@ export function verifyCredential(
   credential: VerifiableCredential,
   publicKey: string | Buffer | KeyObject,
 ): boolean {
-  if (!credential.proof) return false;
-  return verify(
-    null,
-    Buffer.from(canonical(unsigned(credential))),
-    publicKey,
-    Buffer.from(credential.proof.proofValue, "base64url"),
-  );
+  if (!isVerifiableCredential(credential) || !credential.proof) return false;
+  try {
+    return verify(
+      null,
+      Buffer.from(canonical(unsigned(credential))),
+      publicKey,
+      Buffer.from(credential.proof.proofValue, "base64url"),
+    );
+  } catch {
+    return false;
+  }
 }
 export function isVerifiableCredential(
   value: unknown,
 ): value is VerifiableCredential {
   if (!value || typeof value !== "object") return false;
   const credential = value as Partial<VerifiableCredential>;
+  const proof = credential.proof;
   return (
     Array.isArray(credential["@context"]) &&
     Array.isArray(credential.type) &&
@@ -134,7 +139,15 @@ export function isVerifiableCredential(
     Boolean(
       credential.credentialStatus?.statusListIndex &&
         credential.credentialStatus.statusListCredential,
-    )
+    ) &&
+    (!proof ||
+      (proof.type === "DataIntegrityProof" &&
+        proof.cryptosuite === "eddsa-jcs-2022" &&
+        proof.proofPurpose === "assertionMethod" &&
+        typeof proof.created === "string" &&
+        typeof proof.verificationMethod === "string" &&
+        typeof proof.proofValue === "string" &&
+        proof.proofValue.length > 0))
   );
 }
 const hash = (v: string) => createHash("sha256").update(v).digest("hex");

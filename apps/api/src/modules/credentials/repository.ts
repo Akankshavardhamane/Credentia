@@ -8,7 +8,19 @@ export interface StoredCredential {
   reason?: string;
   supersededByCredentialId?: string;
 }
-export class CredentialRepository {
+export interface CredentialRepositoryPort {
+  save(record: StoredCredential): Promise<StoredCredential> | StoredCredential;
+  findById(
+    id: string,
+  ): Promise<StoredCredential | undefined> | StoredCredential | undefined;
+  update(
+    id: string,
+    changes: Partial<StoredCredential>,
+  ): Promise<StoredCredential> | StoredCredential;
+  count(): Promise<number> | number;
+  listVersions(id: string): Promise<StoredCredential[]> | StoredCredential[];
+}
+export class CredentialRepository implements CredentialRepositoryPort {
   private readonly items = new Map<string, StoredCredential>();
   save(record: StoredCredential) {
     this.items.set(record.credential.id, record);

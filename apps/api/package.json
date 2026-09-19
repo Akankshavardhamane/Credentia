@@ -12,6 +12,7 @@
   "dependencies": {
     "@credentia/blockchain": "workspace:*",
     "@credentia/credential-core": "workspace:*",
+    "@credentia/db": "workspace:*",
     "@credentia/domain": "workspace:*",
     "fastify": "^5.1.0",
     "pino-pretty": "^11.3.0",

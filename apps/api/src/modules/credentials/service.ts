@@ -11,10 +11,10 @@ import {
 } from "@credentia/domain";
 import { ConflictError, NotFoundError } from "../../shared/errors.js";
 import type { CredentialQrService } from "./qr.js";
-import type { CredentialRepository } from "./repository.js";
+import type { CredentialRepositoryPort } from "./repository.js";
 export class CredentialService {
   constructor(
-    private readonly repository: CredentialRepository,
+    private readonly repository: CredentialRepositoryPort,
     private readonly signer: {
       privateKey: KeyObject;
       verificationMethod: string;
@@ -36,7 +36,7 @@ export class CredentialService {
         id: input.id ?? `urn:uuid:${randomUUID()}`,
         issuer: input.issuer,
         subject: input.subject,
-        statusIndex: input.statusIndex ?? this.nextStatusIndex(),
+        statusIndex: input.statusIndex ?? (await this.nextStatusIndex()),
         statusListId: input.statusListId ?? "urn:credentia:status:local",
         validFrom: input.validFrom,
         credentialVersion: input.credentialVersion,
@@ -51,13 +51,13 @@ export class CredentialService {
       ...(await this.qr.generate(credential.id)),
     });
   }
-  get(id: string) {
-    const record = this.repository.findById(id);
+  async get(id: string) {
+    const record = await this.repository.findById(id);
     if (!record) throw new NotFoundError("Credential not found");
     return record;
   }
-  updateStatus(id: string, status: CredentialLifecycle, reason?: string) {
-    const record = this.get(id);
+  async updateStatus(id: string, status: CredentialLifecycle, reason?: string) {
+    const record = await this.get(id);
     try {
       return this.repository.update(id, {
         lifecycle: transitionCredential(record.lifecycle, status),
@@ -77,7 +77,7 @@ export class CredentialService {
       validFrom?: string;
     },
   ) {
-    const previous = this.get(id);
+    const previous = await this.get(id);
     const replacement = await this.issue({
       id: input.id,
       issuer: previous.credential.issuer,
@@ -102,8 +102,8 @@ export class CredentialService {
   versions(id: string) {
     return this.repository.listVersions(id);
   }
-  presentation(id: string) {
-    const record = this.get(id);
+  async presentation(id: string) {
+    const record = await this.get(id);
     const { credential } = record;
     return {
       credentialId: credential.id,
@@ -120,6 +120,6 @@ export class CredentialService {
     };
   }
   private nextStatusIndex() {
-    return this.repository.count();
+    return Promise.resolve(this.repository.count());
   }
 }

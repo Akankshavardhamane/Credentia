@@ -17,20 +17,21 @@ export function credentialRoutes(
         await service.issue(issueCredentialRequestSchema.parse(request.body)),
       ),
   );
-  app.get<{ Params: { id: string } }>("/credentials/:id", async (request) =>
-    service.get(request.params.id),
+  app.get<{ Params: { id: string } }>(
+    "/credentials/:id",
+    async (request) => await service.get(request.params.id),
   );
   app.get<{ Params: { id: string } }>(
     "/credentials/:id/presentation",
     async (request) =>
       credentialPresentationSchema.parse(
-        service.presentation(request.params.id),
+        await service.presentation(request.params.id),
       ),
   );
   app.get<{ Params: { id: string } }>(
     "/credentials/:id/status",
     async (request) => {
-      const record = service.get(request.params.id);
+      const record = await service.get(request.params.id);
       return {
         credentialId: record.credential.id,
         status: record.lifecycle,
@@ -63,6 +64,6 @@ export function credentialRoutes(
   );
   app.get<{ Params: { id: string } }>(
     "/credentials/:id/versions",
-    async (request) => service.versions(request.params.id),
+    async (request) => await service.versions(request.params.id),
   );
 }

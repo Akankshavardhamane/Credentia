@@ -1,9 +1,11 @@
-import { generateKeyPairSync } from "node:crypto";
+import type { KeyObject } from "node:crypto";
 import { MockBlockchainAdapter } from "@credentia/blockchain";
 import Fastify from "fastify";
 import { ZodError } from "zod";
+import { loadSigningKeyPair } from "./config/signing-key.js";
 import { CredentialQrService } from "./modules/credentials/qr.js";
 import { CredentialRepository } from "./modules/credentials/repository.js";
+import type { CredentialRepositoryPort } from "./modules/credentials/repository.js";
 import { credentialRoutes } from "./modules/credentials/routes.js";
 import { CredentialService } from "./modules/credentials/service.js";
 import { InstitutionRepository } from "./modules/institutions/repository.js";
@@ -13,7 +15,12 @@ import { VerificationRepository } from "./modules/verification/repository.js";
 import { verificationRoutes } from "./modules/verification/routes.js";
 import { VerificationService } from "./modules/verification/service.js";
 import { HttpError } from "./shared/errors.js";
-export function buildApp() {
+export function buildApp(
+  options: {
+    credentials?: CredentialRepositoryPort;
+    keyPair?: { privateKey: KeyObject; publicKey: KeyObject };
+  } = {},
+) {
   const app = Fastify({
     logger: {
       transport:
@@ -23,8 +30,8 @@ export function buildApp() {
     },
   });
   const institutions = new InstitutionService(new InstitutionRepository());
-  const keyPair = generateKeyPairSync("ed25519");
-  const credentials = new CredentialRepository();
+  const keyPair = options.keyPair ?? loadSigningKeyPair();
+  const credentials = options.credentials ?? new CredentialRepository();
   const verificationMethod = "did:web:demo.university.edu#key-1";
   const chain = new MockBlockchainAdapter([
     {

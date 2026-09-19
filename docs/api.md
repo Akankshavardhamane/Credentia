@@ -25,3 +25,5 @@
 `POST /verify` accepts either `{ "credential": <W3C VC JSON> }` or `{ "credentialId": "urn:..." }`. It returns a `trusted` flag and five independent evidence records: `integrity` (structure and Ed25519 proof), `issuer` (identity trust), `accreditation` (valid authorization), `status` (active lifecycle), and `provenance` (academic type, status-list reference, version).
 
 The QR only encodes the Credentia verification page URL. It is a locator, never proof of authenticity.
+
+When `DATABASE_URL` is set, the API uses the Drizzle/PostgreSQL credential store. Credential documents, lifecycle changes, versions, status history, and verification evidence are persisted. Run `pnpm --filter @credentia/db migrate` against a fresh database before starting the API.

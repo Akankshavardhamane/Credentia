@@ -32,6 +32,9 @@ importers:
       '@credentia/credential-core':
         specifier: workspace:*
         version: link:../../packages/credential-core
+      '@credentia/db':
+        specifier: workspace:*
+        version: link:../../packages/db
       '@credentia/domain':
         specifier: workspace:*
         version: link:../../packages/domain
@@ -99,6 +102,9 @@ importers:
 
   packages/db:
     dependencies:
+      '@credentia/credential-core':
+        specifier: workspace:*
+        version: link:../credential-core
       '@credentia/domain':
         specifier: workspace:*
         version: link:../domain

@@ -6,7 +6,7 @@ import {
   verifyCredential,
 } from "@credentia/credential-core";
 import type { VerificationEvidence } from "@credentia/domain";
-import type { CredentialRepository } from "../credentials/repository.js";
+import type { CredentialRepositoryPort } from "../credentials/repository.js";
 import type { VerificationRepository } from "./repository.js";
 
 export class VerificationService {
@@ -15,18 +15,36 @@ export class VerificationService {
     private readonly keyResolver: (
       verificationMethod: string,
     ) => string | Buffer | KeyObject | undefined,
-    private readonly credentials: CredentialRepository,
+    private readonly credentials: CredentialRepositoryPort,
     private readonly repo: VerificationRepository,
   ) {}
   async verify(credential: VerifiableCredential) {
     const checkedAt = new Date().toISOString();
+    if (!isVerifiableCredential(credential)) {
+      const evidence: VerificationEvidence[] = [
+        "integrity",
+        "issuer",
+        "accreditation",
+        "status",
+        "provenance",
+      ].map((check) => ({
+        check: check as VerificationEvidence["check"],
+        valid: false,
+        detail: "Credential structure or proof is malformed",
+        checkedAt,
+      }));
+      const credentialId = String(
+        (credential as { id?: unknown })?.id ?? "unknown",
+      );
+      this.repo.save(credentialId);
+      return { credentialId, trusted: false, evidence };
+    }
     const accredited = await this.chain.isAccredited(credential.issuer);
-    const stored = this.credentials.findById(credential.id);
+    const stored = await this.credentials.findById(credential.id);
     const key = credential.proof
       ? this.keyResolver(credential.proof.verificationMethod)
       : undefined;
     const integrity =
-      isVerifiableCredential(credential) &&
       Boolean(key) &&
       verifyCredential(credential, key as string | Buffer | KeyObject);
     const status = stored?.lifecycle ?? "active";
@@ -69,14 +87,27 @@ export class VerificationService {
       },
     ];
     this.repo.save(credential.id);
-    return {
+    const result = {
       credentialId: credential.id,
       trusted: evidence.every((item) => item.valid),
       evidence,
     };
+    const recorder = this.credentials as CredentialRepositoryPort & {
+      recordVerification?: (
+        id: string,
+        trusted: boolean,
+        evidence: unknown,
+      ) => Promise<void>;
+    };
+    await recorder.recordVerification?.(
+      credential.id,
+      result.trusted,
+      evidence,
+    );
+    return result;
   }
   async verifyById(credentialId: string) {
-    const stored = this.credentials.findById(credentialId);
+    const stored = await this.credentials.findById(credentialId);
     if (!stored) {
       return {
         credentialId,
