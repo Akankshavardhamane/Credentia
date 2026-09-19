@@ -1,8 +1,68 @@
+import {
+  issueCredentialRequestSchema,
+  supersedeCredentialRequestSchema,
+  updateCredentialStatusRequestSchema,
+} from "@credentia/domain";
+import { credentialPresentationSchema } from "@credentia/domain";
 import type { FastifyInstance } from "fastify";
-export function credentialRoutes(app: FastifyInstance) {
-  app.get("/credentials/:id", async (request) => ({
-    id: (request.params as { id: string }).id,
-    message:
-      "Credential payloads are retained by the issuer or storage adapter.",
-  }));
+import type { CredentialService } from "./service.js";
+export function credentialRoutes(
+  app: FastifyInstance,
+  service: CredentialService,
+) {
+  app.post("/credentials", async (request, reply) =>
+    reply
+      .code(201)
+      .send(
+        await service.issue(issueCredentialRequestSchema.parse(request.body)),
+      ),
+  );
+  app.get<{ Params: { id: string } }>("/credentials/:id", async (request) =>
+    service.get(request.params.id),
+  );
+  app.get<{ Params: { id: string } }>(
+    "/credentials/:id/presentation",
+    async (request) =>
+      credentialPresentationSchema.parse(
+        service.presentation(request.params.id),
+      ),
+  );
+  app.get<{ Params: { id: string } }>(
+    "/credentials/:id/status",
+    async (request) => {
+      const record = service.get(request.params.id);
+      return {
+        credentialId: record.credential.id,
+        status: record.lifecycle,
+        reason: record.reason,
+      };
+    },
+  );
+  app.post<{ Params: { id: string } }>(
+    "/credentials/:id/status",
+    async (request) => {
+      const value = updateCredentialStatusRequestSchema.parse(request.body);
+      return service.updateStatus(
+        request.params.id,
+        value.status,
+        value.reason,
+      );
+    },
+  );
+  app.post<{ Params: { id: string } }>(
+    "/credentials/:id/supersede",
+    async (request, reply) =>
+      reply
+        .code(201)
+        .send(
+          await service.supersede(
+            request.params.id,
+            supersedeCredentialRequestSchema.parse(request.body),
+          ),
+        ),
+  );
+  app.get<{ Params: { id: string } }>(
+    "/credentials/:id/versions",
+    async (request) => service.versions(request.params.id),
+  );
 }

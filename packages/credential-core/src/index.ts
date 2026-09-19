@@ -69,7 +69,9 @@ export function issueCredential(input: {
     validFrom: input.validFrom ?? new Date().toISOString(),
     credentialSubject: input.subject,
     credentialVersion: input.credentialVersion ?? 1,
-    supersedesCredentialId: input.supersedesCredentialId,
+    ...(input.supersedesCredentialId
+      ? { supersedesCredentialId: input.supersedesCredentialId }
+      : {}),
     credentialStatus: {
       id: `${input.statusListId}#${input.statusIndex}`,
       type: "BitstringStatusListEntry",
@@ -111,6 +113,28 @@ export function verifyCredential(
     Buffer.from(canonical(unsigned(credential))),
     publicKey,
     Buffer.from(credential.proof.proofValue, "base64url"),
+  );
+}
+export function isVerifiableCredential(
+  value: unknown,
+): value is VerifiableCredential {
+  if (!value || typeof value !== "object") return false;
+  const credential = value as Partial<VerifiableCredential>;
+  return (
+    Array.isArray(credential["@context"]) &&
+    Array.isArray(credential.type) &&
+    typeof credential.id === "string" &&
+    typeof credential.issuer === "string" &&
+    typeof credential.validFrom === "string" &&
+    Boolean(
+      credential.credentialSubject?.id &&
+        credential.credentialSubject.degree &&
+        credential.credentialSubject.graduationDate,
+    ) &&
+    Boolean(
+      credential.credentialStatus?.statusListIndex &&
+        credential.credentialStatus.statusListCredential,
+    )
   );
 }
 const hash = (v: string) => createHash("sha256").update(v).digest("hex");

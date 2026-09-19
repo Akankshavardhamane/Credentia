@@ -1,1 +1,1 @@
-export { verifyCredentialRequestSchema as verifyInput } from "@credentia/domain";
+export { verifyRequestSchema as verifyInput } from "@credentia/domain";

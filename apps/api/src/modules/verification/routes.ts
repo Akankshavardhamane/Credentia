@@ -1,7 +1,4 @@
-import {
-  type VerifiableCredential,
-  verifyCredential,
-} from "@credentia/credential-core";
+import type { VerifiableCredential } from "@credentia/credential-core";
 import type { FastifyInstance } from "fastify";
 import { verifyInput } from "./schemas.js";
 import type { VerificationService } from "./service.js";
@@ -11,9 +8,8 @@ export function verificationRoutes(
 ) {
   app.post("/verify", async (request) => {
     const value = verifyInput.parse(request.body);
-    return service.verify(
-      value.credential as unknown as VerifiableCredential,
-      verifyCredential,
-    );
+    return "credentialId" in value
+      ? service.verifyById(value.credentialId)
+      : service.verify(value.credential as unknown as VerifiableCredential);
   });
 }
