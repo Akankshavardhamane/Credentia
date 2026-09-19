@@ -1,0 +1,123 @@
+@import url("https://fonts.googleapis.com/css2?family=DM+Mono&family=Manrope:wght@400;600;700;800&display=swap");
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+  background: #f5f6f1;
+  color: #17221d;
+  font-family: Manrope, Arial, sans-serif;
+}
+main {
+  max-width: 1000px;
+  margin: auto;
+  padding: 32px;
+}
+header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-bottom: 1px solid #d9ddd5;
+  padding-bottom: 24px;
+}
+.mark {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  background: #176b52;
+  color: white;
+  font-weight: 800;
+  font-size: 21px;
+}
+h1 {
+  font-size: 20px;
+  margin: 0;
+}
+header p {
+  margin: 0;
+  color: #668075;
+  font-size: 13px;
+}
+nav {
+  margin-left: auto;
+  display: flex;
+  gap: 6px;
+}
+button {
+  border: 0;
+  background: transparent;
+  padding: 9px 12px;
+  text-transform: capitalize;
+  font: inherit;
+  cursor: pointer;
+  border-radius: 8px;
+}
+.active {
+  background: #e1eee8;
+  color: #176b52;
+  font-weight: 700;
+}
+section {
+  max-width: 720px;
+  margin-top: 85px;
+}
+.eyebrow {
+  color: #176b52;
+  font-family: "DM Mono", monospace;
+  font-size: 12px;
+  letter-spacing: .08em;
+}
+h2 {
+  font-size: 42px;
+  line-height: 1.1;
+  margin: 8px 0 22px;
+}
+textarea {
+  display: block;
+  width: 100%;
+  height: 180px;
+  border: 1px solid #cbd6ce;
+  border-radius: 10px;
+  padding: 14px;
+  font: 13px "DM Mono", monospace;
+  background: white;
+}
+.primary {
+  margin-top: 14px;
+  background: #176b52;
+  color: white;
+  font-weight: 700;
+}
+.evidence {
+  margin-top: 34px;
+  display: grid;
+  gap: 10px;
+}
+article {
+  background: white;
+  border-left: 5px solid #176b52;
+  border-radius: 8px;
+  padding: 16px;
+}
+article.invalid {
+  border-color: #ba3b35;
+}
+article p {
+  margin: 6px 0 0;
+  color: #53645b;
+  font-size: 14px;
+}
+@media (max-width: 650px) {
+  header {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+  nav {
+    margin-left: 0;
+  }
+  h2 {
+    font-size: 34px;
+  }
+}

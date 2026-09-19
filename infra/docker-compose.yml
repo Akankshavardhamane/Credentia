@@ -1,0 +1,11 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: credentia
+      POSTGRES_USER: credentia
+      POSTGRES_PASSWORD: credentia
+    ports: ["5432:5432"]
+    volumes: ["credentia-postgres:/var/lib/postgresql/data"]
+volumes:
+  credentia-postgres:

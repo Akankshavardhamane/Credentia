@@ -1,0 +1,9 @@
+{
+  "name": "@credentia/ui",
+  "version": "0.1.0",
+  "type": "module",
+  "exports": "./src/index.ts",
+  "scripts": { "build": "tsc", "typecheck": "tsc --noEmit" },
+  "peerDependencies": { "react": "^18.3.1" },
+  "devDependencies": { "typescript": "^5.7.2" }
+}

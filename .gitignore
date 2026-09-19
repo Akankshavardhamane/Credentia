@@ -1,0 +1,12 @@
+node_modules
+dist
+.turbo
+.env
+*.local
+coverage
+playwright-report
+test-results
+contracts/out
+contracts/cache
+contracts/lib
+packages/storage/.local-storage

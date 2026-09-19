@@ -1,0 +1,4 @@
+/apps/api/ @credentia/api
+/apps/web/ @credentia/web
+/packages/credential-core/ @credentia/credentials
+/contracts/ @credentia/contracts

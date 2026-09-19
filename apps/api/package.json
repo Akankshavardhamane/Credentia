@@ -1,0 +1,21 @@
+{
+  "name": "@credentia/api",
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "seed:demo": "tsx src/seed.ts"
+  },
+  "dependencies": {
+    "@credentia/blockchain": "workspace:*",
+    "@credentia/credential-core": "workspace:*",
+    "@credentia/domain": "workspace:*",
+    "fastify": "^5.1.0",
+    "pino-pretty": "^11.3.0",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": { "tsx": "^4.19.2" }
+}
